@@ -40,7 +40,6 @@ int main(int argc, char const **argv) {
 
 	send(sock,equation,strlen(equation),0);
 	printf("Equation sent from client!\n");
-	buffer[1024] = { 0 };
 
 	valread = read(sock,buffer,1024);
 	printf("Server calculated value: %s\n",buffer);
