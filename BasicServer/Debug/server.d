@@ -1,1 +1,3 @@
-server.o: ../server.c
+server.o: ../server.c ../server.h
+
+../server.h:

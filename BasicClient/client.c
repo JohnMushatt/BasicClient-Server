@@ -34,12 +34,14 @@ int main(int argc, char const **argv) {
 	send(sock,msg,strlen(msg),0);
 	printf("Msg sent from client\n");
 	valread = read(sock,buffer,1024);
-	char *equation = "4 * 3";
 
 	printf("Msg from server: %s\n",buffer);
-	send(sock,equation,strlen(equation),0);
+	char *equation = "4 * 3";
 
-	printf("Equation sent from client!");
+	send(sock,equation,strlen(equation),0);
+	printf("Equation sent from client!\n");
+	buffer[1024] = { 0 };
+
 	valread = read(sock,buffer,1024);
 	printf("Server calculated value: %s\n",buffer);
 	return 0;

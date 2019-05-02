@@ -6,6 +6,9 @@
 C_SRCS += \
 ../server.c 
 
+O_SRCS += \
+../server.o 
+
 OBJS += \
 ./server.o 
 

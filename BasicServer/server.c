@@ -1,19 +1,39 @@
 
 // Server side C/C++ program to demonstrate Socket programming
+#include "server.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/socket.h>
 #include <stdlib.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <ctype.h>
 #define PORT 8080
-char *computeEquation(char *buffer, int len);
 char *computeEquation(char *buffer, int len) {
 	char *result;
 	int termOne, termTwo, answer;
 	char operation;
 	for(int i =0;  i < len;i++) {
-		if()
+		//Get term one
+		if(isdigit(buffer[i]) && termOne==NULL){
+			termOne = atoi(buffer[i]);
+		}
+		else if(isdigit(buffer[i])) {
+			termTwo = atoi(buffer[i]);
+		}
+		else if(buffer[i]=='*' || buffer[i]=='+' || buffer[i]=='-' || buffer[i]=='/') {
+			operation = buffer[i];
+			if(operation=='*') {
+				result = termOne * termTwo;
+			}
+			else if(operation=='+') {
+				result = termOne + termTwo;
+			}
+			else if(operation=='-') {
+				result = termOne - termTwo;
+			}
+		}
+
 	}
 	return result;
 
@@ -69,7 +89,10 @@ int main(int argc, char const *argv[])
     printf("Hello message sent from server\n");
 
     valread = read(new_socket,buffer,1024);
-
+    char *answer = computeEquation(buffer, strlen(buffer));
+    printf("Computed value: %s",answer);
+    send(new_socket,answer,strlen(answer),0);
+    printf("Send new value!");
 
     return 0;
 }
