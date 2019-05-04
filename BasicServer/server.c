@@ -9,12 +9,7 @@
 #include <ctype.h>
 #define PORT 8080
 
-/**
- * Take in a string and parse it, then compute equation's value
- * @param buffer Char buffer that holds the equation
- * @param len Length of buffer
- * @return char value of equation
- */
+
 int getDigits(int num) {
 	int number = num;
 	int count = 0;
@@ -24,6 +19,12 @@ int getDigits(int num) {
 	}
 	return count;
 }
+/**
+ * Take in a string and parse it, then compute equation's value
+ * @param buffer Char buffer that holds the equation
+ * @param len Length of buffer
+ * @return char value of equation
+ */
 int computeEquation(char *buffer, int len) {
 	int result;
 	int termOne =0, termTwo=0, answer;
@@ -94,9 +95,9 @@ int main(int argc, char const *argv[]) {
 		perror("accept");
 		exit(EXIT_FAILURE);
 	}
-	printf("Server is running!\n\n");
+	printf("Server has connected!\n\n");
 	valread = read(new_socket, buffer, 1024);
-	printf("%s\n", buffer);
+	printf("Message receieved: %s\n", buffer);
 	send(new_socket, hello, strlen(hello), 0);
 	printf("Hello message sent from server\n");
 
@@ -104,14 +105,18 @@ int main(int argc, char const *argv[]) {
 	char eqBuffer[1024] = { 0 };
 	int eqvalread = read(new_socket, eqBuffer, 1024);
 	int val = computeEquation(eqBuffer, strlen(eqBuffer));
+	int digits = getDigits(val);
 
 
-	char *response = malloc(getDigits(val)+1);
-	for(int i = getDigits(val)-1;i>0;i--) {
-		response[i] = val/10 - '0';
-		val = val/10;
-	}
+	char *response = (char *) malloc((sizeof(char) * getDigits(val)) + 1);
+	for(int i = digits-1;i>-1;i--) {
+			int c = val%10 + '0';
+			*(response+i)=c;
+			val = val/10;
+		}
+		*(response+getDigits(val) -1) = '\0';
 	send(new_socket, response, strlen(response), 0);
-	//printf("Send new value!");
+	printf("Serving stopping!\n");
+
 	return 0;
 }

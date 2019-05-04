@@ -6,6 +6,7 @@
 #define PORT 8080
 
 int main(int argc, char const **argv) {
+	printf("Client starting!\n");
 	struct sockaddr_in address;
 	int sock = 0;
 	int valread;
@@ -41,7 +42,9 @@ int main(int argc, char const **argv) {
 	send(sock,equation,strlen(equation),0);
 	printf("Equation sent from client!\n");
 
+	memset(buffer,0,1024);
 	valread = read(sock,buffer,1024);
 	printf("Server calculated value: %s\n",buffer);
+	printf("Client stopping\n");
 	return 0;
 }
