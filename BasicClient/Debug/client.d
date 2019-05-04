@@ -1,1 +1,3 @@
-client.o: ../client.c
+client.o: ../client.c ../minunit.h
+
+../minunit.h:
