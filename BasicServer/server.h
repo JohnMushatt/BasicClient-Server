@@ -3,4 +3,4 @@
  * @param buffer String/Char array containing 2 terms and 1 operation
  * @param len Length of buffer
  */
-int *computeEquation(char* buffer, int len);
+int computeEquation(char* buffer, int len);

@@ -24,7 +24,7 @@ int getDigits(int num) {
 	}
 	return count;
 }
-int *computeEquation(char *buffer, int len) {
+int computeEquation(char *buffer, int len) {
 	int result;
 	int termOne =0, termTwo=0, answer;
 	char operation;
@@ -94,19 +94,22 @@ int main(int argc, char const *argv[]) {
 		perror("accept");
 		exit(EXIT_FAILURE);
 	}
+	printf("Server is running!\n\n");
 	valread = read(new_socket, buffer, 1024);
 	printf("%s\n", buffer);
 	send(new_socket, hello, strlen(hello), 0);
 	printf("Hello message sent from server\n");
-	char *eqBuffer[1024] = { 0 };
+
+
+	char eqBuffer[1024] = { 0 };
 	int eqvalread = read(new_socket, eqBuffer, 1024);
 	int val = computeEquation(eqBuffer, strlen(eqBuffer));
-	//printf("Computed value: %d", val);
 
-	char *response;
-	int start = getDigits(val)-1;
-	for(start; start >0;start--) {
-		response[start] = val/10;
+
+	char *response = malloc(getDigits(val)+1);
+	for(int i = getDigits(val)-1;i>0;i--) {
+		response[i] = val/10 - '0';
+		val = val/10;
 	}
 	send(new_socket, response, strlen(response), 0);
 	//printf("Send new value!");
