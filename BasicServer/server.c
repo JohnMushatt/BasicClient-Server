@@ -85,7 +85,6 @@ void init_server() {
 
 	int opt = 1;
 	int addrlen = sizeof(address);
-
 	// Creating socket file descriptor
 	if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0) {
 		perror("socket failed");
@@ -120,7 +119,6 @@ void init_server() {
 }
 static char * test_servermsg() {
 
-
 }
 int main(int argc, char const *argv[]) {
 
@@ -130,28 +128,49 @@ int main(int argc, char const *argv[]) {
 	} else {
 		printf("ALL TESTS PASSED\n");
 	}
-	init_server();
 	printf("Tests run: %d\n", tests_run);
-	valread = read(new_socket, buffer, 1024);
-	printf("Message received: %s\n", buffer);
-	char *sever_message = "This is from the server";
-	send(new_socket, sever_message, strlen(sever_message), 0);
-	printf("Server message sent!\n");
-	memset(buffer,0,1024);
+	init_server();
+	/*
+	 valread = read(new_socket, buffer, 1024);
+	 printf("Message received: %s\n", buffer);
+	 char *sever_message = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 20\nThis is from the server";
+	 send(new_socket, sever_message, strlen(sever_message), 0);
+	 printf("Server message sent!\n");
+	 */
+	int addrlen = sizeof(address);
 
-	int eqvalread = read(new_socket, buffer, 1024);
-	int val = computeEquation(buffer, strlen(buffer));
-	int digits = getDigits(val);
+	while (1) {
+		 char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
+		printf("\n+++++++ Waiting for new connection ++++++++\n\n");
+		if ((new_socket = accept(server_fd, (struct sockaddr *) &address,
+				(socklen_t*) &addrlen)) < 0) {
+			perror("In accept");
+			exit(EXIT_FAILURE);
+		}
 
-	char *response = (char *) malloc((sizeof(char) * getDigits(val)) + 1);
-	for (int i = digits - 1; i > -1; i--) {
-		int c = val % 10 + '0';
-		*(response + i) = c;
-		val = val / 10;
+		char buffer[30000] = { 0 };
+		valread = read(new_socket, buffer, 30000);
+		printf("%s\n", buffer);
+		write(new_socket, hello, strlen(hello));
+		printf("------------------Hello message sent-------------------");
+		close(new_socket);
 	}
-	*(response + getDigits(val) - 1) = '\0';
-	send(new_socket, response, strlen(response), 0);
-	printf("Serving stopping!\n");
+	/*
+	 memset(buffer,0,1024);
 
+	 int eqvalread = read(new_socket, buffer, 1024);
+	 int val = computeEquation(buffer, strlen(buffer));
+	 int digits = getDigits(val);
+
+	 char *response = (char *) malloc((sizeof(char) * getDigits(val)) + 1);
+	 for (int i = digits - 1; i > -1; i--) {
+	 int c = val % 10 + '0';
+	 *(response + i) = c;
+	 val = val / 10;
+	 }
+	 *(response + getDigits(val) - 1) = '\0';
+	 send(new_socket, response, strlen(response), 0);
+	 printf("Serving stopping!\n");
+	 */
 	return 0;
 }
