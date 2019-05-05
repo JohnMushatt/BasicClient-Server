@@ -4,15 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../http_parser.c \
 ../server.c 
 
 O_SRCS += \
+../http_parser.o \
 ../server.o 
 
 OBJS += \
+./http_parser.o \
 ./server.o 
 
 C_DEPS += \
+./http_parser.d \
 ./server.d 
 
 

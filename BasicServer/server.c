@@ -8,6 +8,10 @@
 #include <string.h>
 #include <ctype.h>
 #include "minunit.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "http_response.h"
+
 #define PORT 8080
 int tests_run = 0;
 
@@ -117,8 +121,56 @@ void init_server() {
 	}
 	printf("Server has connected!\n\n");
 }
-static char * test_servermsg() {
-
+char *int2char(int num) {
+	int dig = getDigits(num);
+	char *buffer = malloc(sizeof(char) * (dig + 1));
+	for (int i = dig - 1; i > -1; i--) {
+		*(buffer + i) = num % 10 + '0';
+		num = num / 10;
+	}
+	*(buffer + dig + 1) = '\0';
+	return buffer;
+}
+char *getContent_Type(const char *buffer) {
+	char *content_type;
+	int len = strlen(buffer);
+	for (int i = 0; i < len; i++) {
+		char c = *(buffer + i);
+	}
+	return content_type;
+}
+/**
+ * Returns the absolute file path from the http request
+ *  /index.html
+ */
+char *getFilePath(const char *buffer) {
+	char *temp = malloc(sizeof(char) *(strlen(buffer)));
+	memcpy(temp,buffer,strlen(buffer));
+	char *relativePath,*absolutePath;
+	char  *fileIndex;
+	//Gets the 1st occurrence of " "
+	char *r= strstr(temp," ");
+	int index = r - temp;
+	int len = strlen(temp)-index;
+	//int index = strcspn(temp," ")+1;
+	//int index2 = strcspn((temp+index)," ");
+	//relativePath = malloc(sizeof(char) * (index2-index+1));
+	//for(int i = 0,j=index;j < index2;i++,j++) {
+	//	*(relativePath + i) = *(temp+j);
+	//}
+}
+/**
+ * Generates an http response given the http request
+ * @param buffer Http request string
+ * @return struct containing some parsed elements from the request and the proper response packages
+ */
+http_response_package buildResponse(char* buffer) {
+	char *filename = getFilePath(buffer);
+	http_response_package resp;
+	//resp.content_size = int2char(size);
+	//resp.content_type = ""
+	//resp.content = getContent_Type(request);
+	return resp;
 }
 int main(int argc, char const *argv[]) {
 
@@ -130,47 +182,31 @@ int main(int argc, char const *argv[]) {
 	}
 	printf("Tests run: %d\n", tests_run);
 	init_server();
-	/*
-	 valread = read(new_socket, buffer, 1024);
-	 printf("Message received: %s\n", buffer);
-	 char *sever_message = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 20\nThis is from the server";
-	 send(new_socket, sever_message, strlen(sever_message), 0);
-	 printf("Server message sent!\n");
-	 */
 	int addrlen = sizeof(address);
-
 	while (1) {
-		 char *hello = "HTTP/1.1 200 OK\nContent-Type: text/plain\nContent-Length: 12\n\nHello world!";
-		printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-		if ((new_socket = accept(server_fd, (struct sockaddr *) &address,
-				(socklen_t*) &addrlen)) < 0) {
-			perror("In accept");
-			exit(EXIT_FAILURE);
-		}
+
 
 		char buffer[30000] = { 0 };
 		valread = read(new_socket, buffer, 30000);
+
+		char *request = malloc(sizeof(char) * 56);
+		strncpy(request, buffer, 15);
+		*(request + 16) = '\0';
+		FILE *file =
+				fopen(
+						"/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/index.html",
+						"r");
+		int fd = fileno(file);
+		struct stat buf;
+		fstat(fd, &buf);
+		off_t size = buf.st_size;
+		http_response_package resp;
+		resp = buildResponse(buffer);
 		printf("%s\n", buffer);
-		write(new_socket, hello, strlen(hello));
-		printf("------------------Hello message sent-------------------");
+		printf("Extracted request: %s\n", request);
+		//write(new_socket, hello, strlen(hello));
+		//printf("------------------Hello message sent-------------------");
 		close(new_socket);
 	}
-	/*
-	 memset(buffer,0,1024);
-
-	 int eqvalread = read(new_socket, buffer, 1024);
-	 int val = computeEquation(buffer, strlen(buffer));
-	 int digits = getDigits(val);
-
-	 char *response = (char *) malloc((sizeof(char) * getDigits(val)) + 1);
-	 for (int i = digits - 1; i > -1; i--) {
-	 int c = val % 10 + '0';
-	 *(response + i) = c;
-	 val = val / 10;
-	 }
-	 *(response + getDigits(val) - 1) = '\0';
-	 send(new_socket, response, strlen(response), 0);
-	 printf("Serving stopping!\n");
-	 */
 	return 0;
 }
