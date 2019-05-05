@@ -11,7 +11,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "http_response.h"
-
+#include <linux/limits.h>
 #define PORT 8080
 int tests_run = 0;
 
@@ -146,18 +146,20 @@ char *getContent_Type(const char *buffer) {
 char *getFilePath(const char *buffer) {
 	char *temp = malloc(sizeof(char) *(strlen(buffer)));
 	memcpy(temp,buffer,strlen(buffer));
-	char *relativePath,*absolutePath;
-	char  *fileIndex;
+	char *relativePath;
+	char *resolved[100000];
 	//Gets the 1st occurrence of " "
-	char *r= strstr(temp," ");
-	int index = r - temp;
-	int len = strlen(temp)-index;
+	char *r= strstr(temp," ")+1;
+	int index = strcspn(r," ");
+	relativePath = malloc(sizeof(char) * (index+1));
+	strncpy(relativePath,r,index);
 	//int index = strcspn(temp," ")+1;
 	//int index2 = strcspn((temp+index)," ");
 	//relativePath = malloc(sizeof(char) * (index2-index+1));
 	//for(int i = 0,j=index;j < index2;i++,j++) {
 	//	*(relativePath + i) = *(temp+j);
 	//}
+	char *path=realpath(relativePath,resolved);
 }
 /**
  * Generates an http response given the http request
