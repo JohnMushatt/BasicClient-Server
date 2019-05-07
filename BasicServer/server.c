@@ -143,23 +143,50 @@ char *getContent_Type(const char *buffer) {
  * Returns the absolute file path from the http request
  *  /index.html
  */
-char *getFilePath(const char *buffer) {
-	char *temp = malloc(sizeof(char) *(strlen(buffer)));
-	memcpy(temp,buffer,strlen(buffer));
+char *getFileBytes(const char *buffer) {
+	//Allocate enough memory to hold the buffer
+	char *temp = malloc(sizeof(char) * (strlen(buffer)));
+	//Copy the buffer over to temp
+	memcpy(temp, buffer, strlen(buffer));
+	//Declare relative path
 	char *relativePath;
-	char *resolved[100000];
+
 	//Gets the 1st occurrence of " "
-	char *r= strstr(temp," ")+1;
-	int index = strcspn(r," ");
-	relativePath = malloc(sizeof(char) * (index+1));
-	strncpy(relativePath,r,index);
-	//int index = strcspn(temp," ")+1;
-	//int index2 = strcspn((temp+index)," ");
-	//relativePath = malloc(sizeof(char) * (index2-index+1));
-	//for(int i = 0,j=index;j < index2;i++,j++) {
-	//	*(relativePath + i) = *(temp+j);
-	//}
-	char *path=realpath(relativePath,resolved);
+	char *r = strstr(temp, "/") + 1;
+	//Get the next whitespace aka the end of the file request
+	int index = strcspn(r, " ");
+	//Allocatte memory for relative path
+	relativePath = malloc(sizeof(char) * (index + 1));
+	//Copy over the file name and extension
+	strncpy(relativePath, r, index);
+	//Base file path for ALL HTML FILES
+	char *path = "/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/";
+	//Allocate enough memory
+	char *filePath = malloc(sizeof(char) * (strlen(path)+strlen(relativePath)+1));
+	//Concatenate path onto file path
+	strcat(filePath,path);
+	//Concatenate relativePath onto file path
+	strcat(filePath,relativePath);
+	//Open the file
+	FILE *f;
+	f=fopen(path, "r");
+	//If we can get the file opened
+	if (f != 0) {
+
+		//Get the files size for copying # of bytes
+		int fd = fileno(f);
+		struct stat buf;
+		fstat(fd, &buf);
+		off_t size= buf.st_size;
+		char bytes[size+1];
+		int attempt = fopen(bytes, sizeof(char), size, f);
+		if(attempt>0) {
+			return bytes;
+		}
+		else {
+			perror("Could not copy file contents\n");
+		}
+	}
 }
 /**
  * Generates an http response given the http request
@@ -167,11 +194,10 @@ char *getFilePath(const char *buffer) {
  * @return struct containing some parsed elements from the request and the proper response packages
  */
 http_response_package buildResponse(char* buffer) {
-	char *filename = getFilePath(buffer);
 	http_response_package resp;
 	//resp.content_size = int2char(size);
 	//resp.content_type = ""
-	//resp.content = getContent_Type(request);
+	resp.content= getFileBytes(buffer);
 	return resp;
 }
 int main(int argc, char const *argv[]) {
@@ -187,7 +213,6 @@ int main(int argc, char const *argv[]) {
 	int addrlen = sizeof(address);
 	while (1) {
 
-
 		char buffer[30000] = { 0 };
 		valread = read(new_socket, buffer, 30000);
 
@@ -198,10 +223,7 @@ int main(int argc, char const *argv[]) {
 				fopen(
 						"/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/index.html",
 						"r");
-		int fd = fileno(file);
-		struct stat buf;
-		fstat(fd, &buf);
-		off_t size = buf.st_size;
+
 		http_response_package resp;
 		resp = buildResponse(buffer);
 		printf("%s\n", buffer);
