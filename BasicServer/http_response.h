@@ -9,8 +9,6 @@
 #define HTTP_RESPONSE_H_
 
 typedef struct {
-	char *method;
-	char *file;
 	char *content_type;
 	char *content_size;
 	char *content;

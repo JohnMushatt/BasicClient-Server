@@ -131,11 +131,17 @@ char *int2char(int num) {
 	*(buffer + dig + 1) = '\0';
 	return buffer;
 }
+/**
+ * Parses http request for content type based on file extension that is being requested
+ * @param buffer HTTP request to be parsed
+ * @return Pointer to a buffer containing either the content-type or something else
+ */
 char *getContent_Type(const char *buffer) {
 	char *content_type;
 	int len = strlen(buffer);
-	for (int i = 0; i < len; i++) {
-		char c = *(buffer + i);
+	char *content;
+	if (content = strstr(buffer, ".html") != 0) {
+		content_type = "text/html";
 	}
 	return content_type;
 }
@@ -160,16 +166,23 @@ char *getFileBytes(const char *buffer) {
 	//Copy over the file name and extension
 	strncpy(relativePath, r, index);
 	//Base file path for ALL HTML FILES
-	char *path = "/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/";
+	char *path =
+			"/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/";
 	//Allocate enough memory
-	char *filePath = malloc(sizeof(char) * (strlen(path)+strlen(relativePath)+1));
+	char *filePath = malloc(
+			sizeof(char) * (strlen(path) + strlen(relativePath) + 1));
+
 	//Concatenate path onto file path
-	strcat(filePath,path);
+	strcat(filePath, path);
+
 	//Concatenate relativePath onto file path
-	strcat(filePath,relativePath);
+	strcat(filePath, relativePath);
+
 	//Open the file
 	FILE *f;
-	f=fopen(path, "r");
+	f = fopen(filePath, "r");
+	char *bytes;
+
 	//If we can get the file opened
 	if (f != 0) {
 
@@ -177,16 +190,23 @@ char *getFileBytes(const char *buffer) {
 		int fd = fileno(f);
 		struct stat buf;
 		fstat(fd, &buf);
-		off_t size= buf.st_size;
-		char bytes[size+1];
-		int attempt = fopen(bytes, sizeof(char), size, f);
-		if(attempt>0) {
-			return bytes;
-		}
-		else {
+		off_t size = buf.st_size;
+		bytes = malloc(sizeof(char) * (size + 1));
+		int attempt = fread(bytes, sizeof(char), size, f);
+		//If succesfully copied content, free up non-essential buffers
+		if (attempt > 0) {
+			free(relativePath);
+			//free(&buf);
+			free(temp);
+			free(filePath);
+			close(f);
+		} else {
 			perror("Could not copy file contents\n");
 		}
+	} else {
+		perror("Could not copy file contents\n");
 	}
+	return bytes;
 }
 /**
  * Generates an http response given the http request
@@ -196,8 +216,8 @@ char *getFileBytes(const char *buffer) {
 http_response_package buildResponse(char* buffer) {
 	http_response_package resp;
 	//resp.content_size = int2char(size);
-	//resp.content_type = ""
-	resp.content= getFileBytes(buffer);
+	resp.content_type = getContent_Type(buffer);
+	resp.content = getFileBytes(buffer);
 	return resp;
 }
 int main(int argc, char const *argv[]) {
@@ -219,17 +239,10 @@ int main(int argc, char const *argv[]) {
 		char *request = malloc(sizeof(char) * 56);
 		strncpy(request, buffer, 15);
 		*(request + 16) = '\0';
-		FILE *file =
-				fopen(
-						"/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/index.html",
-						"r");
 
 		http_response_package resp;
 		resp = buildResponse(buffer);
 		printf("%s\n", buffer);
-		printf("Extracted request: %s\n", request);
-		//write(new_socket, hello, strlen(hello));
-		//printf("------------------Hello message sent-------------------");
 		close(new_socket);
 	}
 	return 0;
