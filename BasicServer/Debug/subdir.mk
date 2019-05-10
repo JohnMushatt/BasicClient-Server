@@ -4,20 +4,25 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../http_parser.c \
-../server.c 
+../http_response.c \
+../server.c \
+../utilities.c 
 
 O_SRCS += \
 ../http_parser.o \
-../server.o 
+../http_response.o \
+../server.o \
+../utilities.o 
 
 OBJS += \
-./http_parser.o \
-./server.o 
+./http_response.o \
+./server.o \
+./utilities.o 
 
 C_DEPS += \
-./http_parser.d \
-./server.d 
+./http_response.d \
+./server.d \
+./utilities.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
