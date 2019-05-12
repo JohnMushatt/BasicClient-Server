@@ -101,8 +101,8 @@ int main(int argc, char const *argv[]) {
 			strncpy(request, buffer, 15);
 			*(request + 16) = '\0';
 
-			http_response_package resp;
-			resp = buildResponse(buffer);
+			http_response_package *resp =buildResponse(buffer);
+
 			printf("%s\n", buffer);
 			close(new_socket);
 		}

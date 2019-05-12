@@ -12,11 +12,11 @@
  * @param buffer Http request string
  * @return struct containing some parsed elements from the request and the proper response packages
  */
-http_response_package buildResponse(char* buffer) {
-	http_response_package resp;
+http_response_package *buildResponse(char* buffer) {
+	http_response_package *resp;
 	//resp.content_size = int2char(size);
-	resp.content_type = getContent_Type(buffer);
-	resp.content = getFileBytes(buffer);
+	getContent_Type(buffer,resp);
+	getFileBytes(buffer,resp);
 	return resp;
 }
 
@@ -25,13 +25,13 @@ http_response_package buildResponse(char* buffer) {
  * @param buffer HTTP request to be parsed
  * @return Pointer to a buffer containing either the content-type or something else
  */
-char *getContent_Type(const char *buffer) {
+void getContent_Type(const char *buffer, http_response_package *resp) {
 	char *content_type;
 	char *content;
 	if (content = strstr(buffer, ".html") != 0) {
 		content_type = "text/html";
 	}
-	return content_type;
+	resp->content_type=content_type;
 }
 
 /**
@@ -39,7 +39,7 @@ char *getContent_Type(const char *buffer) {
  * @param buffer HTTP Request to parse
  * @return Buffer containing parsed file content
  */
-char *getFileBytes(const char *buffer) {
+void getFileBytes(const char *buffer, http_response_package *resp) {
 	//Allocate enough memory to hold the buffer
 	char *temp = malloc(sizeof(char) * (strlen(buffer)));
 	//Copy the buffer over to temp
@@ -85,14 +85,13 @@ char *getFileBytes(const char *buffer) {
 		int attempt = fread(bytes, sizeof(char), size, f);
 		//If successfully copied content, free up non-essential buffers
 		if (attempt > 0) {
-			return bytes;
-
+			resp->content=bytes;
+			resp->content_size=size;
 		} else {
 			perror("Could not copy file contents\n");
 		}
 	} else {
 		perror("Could not copy file contents\n");
 	}
-	return NULL;
 }
 

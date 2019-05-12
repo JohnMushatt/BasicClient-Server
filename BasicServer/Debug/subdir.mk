@@ -8,12 +8,6 @@ C_SRCS += \
 ../server.c \
 ../utilities.c 
 
-O_SRCS += \
-../http_parser.o \
-../http_response.o \
-../server.o \
-../utilities.o 
-
 OBJS += \
 ./http_response.o \
 ./server.o \

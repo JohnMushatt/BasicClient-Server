@@ -20,9 +20,9 @@ typedef struct {
 
 } http_response_package;
 
-http_response_package buildResponse(char* buffer);
+http_response_package *buildResponse(char* buffer);
 
-char *getFileBytes(const char *buffer);
+void getFileBytes(const char *buffer,http_response_package *resp);
 
-char *getContent_Type(const char *buffer);
+void getContent_Type(const char *buffer,http_response_package *resp);
 #endif /* HTTP_RESPONSE_H_ */
