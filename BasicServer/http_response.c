@@ -6,17 +6,18 @@
  */
 #include "http_response.h"
 
-
 /**
  * Generates an http response given the http request
  * @param buffer Http request string
  * @return struct containing some parsed elements from the request and the proper response packages
  */
 http_response_package *buildResponse(char* buffer) {
-	http_response_package *resp;
+	http_response_package *resp = malloc(sizeof(http_response_package));
+	resp->protocol_version = "HTTP/1.1";
 	//resp.content_size = int2char(size);
-	getContent_Type(buffer,resp);
-	getFileBytes(buffer,resp);
+	getContent_Type(buffer, resp);
+	getFileBytes(buffer, resp);
+	printf("HTTP Response created!\n");
 	return resp;
 }
 
@@ -28,12 +29,48 @@ http_response_package *buildResponse(char* buffer) {
 void getContent_Type(const char *buffer, http_response_package *resp) {
 	char *content_type;
 	char *content;
-	if (content = strstr(buffer, ".html") != 0) {
+	if ((content = strstr(buffer, ".html")) != 0) {
 		content_type = "text/html";
 	}
-	resp->content_type=content_type;
+	resp->content_type = content_type;
 }
+/**
+ * Prints the http_response_package struct
+ */
+void print_package(http_response_package *resp) {
+	printf("Protocol Version: %s\nStatus Code: %s\nStatus Text: %s\n",
+			resp->protocol_version, resp->status_code, resp->status_text);
+	printf("Content-Type: %s\nContent-Size: %s\nContent: %s",
+			resp->content_type, resp->content_size, resp->content);
 
+}
+/**
+ * Formats the http_response_package into a buffer than can be sent in a socket
+ */
+char *formatPackage(http_response_package *resp) {
+	char *buffer = malloc(sizeof(http_response_package) + 100);
+	strcat(buffer, resp->protocol_version);
+	strcat(buffer, " ");
+	strcat(buffer, resp->status_code);
+	strcat(buffer, " ");
+	strcat(buffer, resp->status_text);
+	strcat(buffer, "\nContent-Length: ");
+	strcat(buffer, resp->content_size);
+	strcat(buffer, "\nContent-Type: ");
+	strcat(buffer, resp->content_type);
+	strcat(buffer, "\n\n");
+	strcat(buffer, resp->content);
+	strcat(buffer, "\n");
+	/*
+	 char *buffer = " " + resp->protocol_version + " " + resp->status_code + " "
+	 + resp->status_text + "\nContent-Length: " + resp->content_size
+	 + "\nContent-Type: " + resp->content_type;
+	 */
+	printf(
+			"---------------FORMATTED PACKAGE---------------\n%s\n------------------------------\n",
+			buffer);
+	return buffer;
+}
 /**
  * Gets the file from the HTTP request and parses its content into a buffer
  * @param buffer HTTP Request to parse
@@ -85,13 +122,21 @@ void getFileBytes(const char *buffer, http_response_package *resp) {
 		int attempt = fread(bytes, sizeof(char), size, f);
 		//If successfully copied content, free up non-essential buffers
 		if (attempt > 0) {
-			resp->content=bytes;
-			resp->content_size=size;
+			resp->content = bytes;
+			resp->content_size = int2char(size);
+			resp->status_code = "200";
+			resp->status_text = "Success";
 		} else {
 			perror("Could not copy file contents\n");
+			resp->status_code = "400";
+			resp->status_text = "Could not find requested file";
+
 		}
 	} else {
 		perror("Could not copy file contents\n");
+		resp->status_code = "400";
+		resp->status_text = "Could not find requested file";
+
 	}
 }
 

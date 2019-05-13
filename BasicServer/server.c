@@ -21,8 +21,6 @@ struct sockaddr_in address;
 
 char buffer[1024] = { 0 };
 
-
-
 static char *test_getDigits1() {
 	char *err_msg = "Wrong number of digits";
 	int num1 = 100;
@@ -79,7 +77,6 @@ void init_server() {
 	printf("Server has connected!\n\n");
 }
 
-
 int main(int argc, char const *argv[]) {
 
 	char *test = test_getDigits();
@@ -91,24 +88,24 @@ int main(int argc, char const *argv[]) {
 	printf("Tests run: %d\n", tests_run);
 	init_server();
 	int addrlen = sizeof(address);
+	int msg_count = 0;
 	while (1) {
 
 		char buffer[30000] = { 0 };
-		if (valread > 0) {
-			valread = read(new_socket, buffer, 30000);
+		if ((valread = read(new_socket, buffer, 30000)) > 0) {
+			msg_count++;
 
-			char *request = malloc(sizeof(char) * 56);
-			strncpy(request, buffer, 15);
-			*(request + 16) = '\0';
+			printf("Connection#%d\n%s\n", msg_count, buffer);
 
-			http_response_package *resp =buildResponse(buffer);
-
-			printf("%s\n", buffer);
+			http_response_package *resp = buildResponse(buffer);
+			print_package(resp);
+			//send(new_socket,)
+			char *msg = formatPackage(resp);
+			write(new_socket, msg, strlen(msg));
 			close(new_socket);
-		}
-		else {
+		} else {
 			printf("waiting for new connection\n");
-			sleep(5);
+			init_server();
 		}
 	}
 	return 0;
