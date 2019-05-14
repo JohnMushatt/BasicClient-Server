@@ -27,13 +27,13 @@ static char *test_getDigits1() {
 	mu_assert(err_msg, getDigits(num1) == 3);
 	return 0;
 }
-static char * test_getDigits2() {
+static char *test_getDigits2() {
 	char *err_msg = "Wrong number of digits";
 	int num1 = 20;
 	mu_assert(err_msg, getDigits(num1) == 2);
 	return 0;
 }
-static char * test_getDigits() {
+static char *test_getDigits() {
 	mu_run_test(test_getDigits1);
 	mu_run_test(test_getDigits2);
 	return 0;

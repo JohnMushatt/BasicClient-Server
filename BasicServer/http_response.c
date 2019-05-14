@@ -128,15 +128,41 @@ void getFileBytes(const char *buffer, http_response_package *resp) {
 			resp->status_text = "Success";
 		} else {
 			perror("Could not copy file contents\n");
-			resp->status_code = "400";
+			resp->status_code = "404";
 			resp->status_text = "Could not find requested file";
+			f =
+					fopen(
+							"/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/error.html",
+							"r");
+			fd = fileno(f);
+			fstat(fd, &buf);
+			size = buf.st_size;
+			bytes = malloc(sizeof(char) * (size + 1));
+			int attempt = fread(bytes, sizeof(char), size, f);
 
+			resp->content = bytes;
+			resp->content_size = int2char(size);
+			resp->content_type = "text/html";
 		}
 	} else {
 		perror("Could not copy file contents\n");
-		resp->status_code = "400";
+		resp->status_code = "404";
 		resp->status_text = "Could not find requested file";
+		f =
+				fopen(
+						"/home/jemushatt/Desktop/Network Projects/BasicClient-Server/BasicServer/html/error.html",
+						"r");
+		int fd = fileno(f);
+		struct stat buf;
 
+		fstat(fd, &buf);
+		off_t size = buf.st_size;
+		bytes = malloc(sizeof(char) * (size + 1));
+		int attempt = fread(bytes, sizeof(char), size, f);
+
+		resp->content = bytes;
+		resp->content_size = int2char(size);
+		resp->content_type = "text/html";
 	}
 }
 
